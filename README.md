@@ -54,3 +54,14 @@ vercel
 ```
 
 O conectá el repositorio directamente desde [vercel.com](https://vercel.com) y configurá las variables de entorno en el dashboard.
+
+## 🔄 Redesplegar desde cero
+
+Si clonás el proyecto en una máquina nueva:
+```bash
+npm install
+vercel link
+vercel --prod
+```
+
+> Las variables de entorno se configuran desde el dashboard de Vercel, no se necesita el `.env` para desplegar.
