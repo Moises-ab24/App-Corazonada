@@ -42,6 +42,21 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
     })));
   }, [productosActivos]);
 
+  useEffect(() => {
+    const guardado = localStorage.getItem('nuevoPedidoDraft');
+    if (guardado) {
+      const d = JSON.parse(guardado);
+      setNombreComprador(d.nombreComprador || '');
+      setSeccion(d.seccion || '');
+      setSeccionDestinatario(d.seccionDestinatario || '');
+      setDestinatario(d.destinatario || '');
+      setDescripcion(d.descripcion || '');
+      setNotasInternas(d.notasInternas || '');
+      setEstadoPedido(d.estadoPedido || 'pagado');
+      localStorage.removeItem('nuevoPedidoDraft');
+    }
+  }, []);
+
   const total = useMemo(() => rows.reduce((s, r) => s + r.subtotal, 0), [rows]);
 
   const updateCantidad = useCallback((id: string, delta: number) => {
@@ -86,7 +101,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
     if (ok) {
       setSuccess(`¡Pedido por ${fmt(total)} registrado exitosamente!`);
       limpiar();
-      setTimeout(() => setSuccess(''), 4000);
+      setTimeout(() => setSuccess(''), 3000);
     }
     setIsSubmitting(false);
   };
@@ -122,13 +137,6 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
         <p style={S.subtitle}>Registra un pedido de Corazonada</p>
       </div>
 
-      {success && (
-        <div style={S.successBanner}>
-          <Check size={18} color="#22C55E" />
-          <span>{success}</span>
-        </div>
-      )}
-
       <div style={{ padding: '0 16px' }}>
         {/* Comprador */}
         <div style={S.group}>
@@ -143,7 +151,13 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
         <div style={S.group}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ ...S.label, marginBottom: 0 }}>Sección del comprador</label>
-            <button onClick={onGoToSecciones} style={{ background: 'none', color: '#AEABFA' }}>
+            <button onClick={() => {
+              localStorage.setItem('nuevoPedidoDraft', JSON.stringify({
+                nombreComprador, seccion, seccionDestinatario,
+                destinatario, descripcion, notasInternas, estadoPedido
+              }));
+              onGoToSecciones();
+            }} style={{ background: 'none', color: '#AEABFA' }}>
               <Settings size={16} />
             </button>
           </div>
@@ -258,7 +272,13 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
         <div style={S.group}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ ...S.label, marginBottom: 0 }}>Productos</label>
-            <button onClick={onGoToProductos} style={{ background: 'none', color: '#AEABFA' }}>
+            <button onClick={() => {
+              localStorage.setItem('nuevoPedidoDraft', JSON.stringify({
+                nombreComprador, seccion, seccionDestinatario,
+                destinatario, descripcion, notasInternas, estadoPedido
+              }));
+              onGoToProductos();
+            }} style={{ background: 'none', color: '#AEABFA' }}>
               <Settings size={16} />
             </button>
           </div>
@@ -311,6 +331,16 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
           </button>
         </div>
       </div>
+
+      {success && (
+        <div style={S.successBanner}>
+          <Check size={18} color="#22C55E" />
+          <span style={{ flex: 1 }}>{success}</span>
+          <button onClick={() => setSuccess('')} style={{ background: 'none', padding: '0 0 0 8px' }}>
+            <X size={16} color="#22C55E" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -365,8 +395,11 @@ const S: Record<string, React.CSSProperties> = {
   },
   successBanner: {
     display: 'flex', alignItems: 'center', gap: '8px',
-    background: 'rgba(34,197,94,0.1)', padding: '12px 16px', margin: '0 16px 8px',
+    background: '#052e16', padding: '12px 16px',
     borderRadius: '10px', color: '#22C55E', fontSize: '14px',
+    position: 'fixed', bottom: '72px', left: '16px', right: '16px',
+    zIndex: 999, boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+    border: '1px solid #166534',
   },
   errorBanner: {
     display: 'flex', alignItems: 'center', gap: '8px',

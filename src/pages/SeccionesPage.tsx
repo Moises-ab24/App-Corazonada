@@ -10,7 +10,16 @@ export default function SeccionesPage({ onBack }: { onBack: () => void }) {
   const [editNombre, setEditNombre] = useState('');
   const [confirmDel, setConfirmDel] = useState<Seccion | null>(null);
 
-  const ordenadas = useMemo(() => [...secciones].sort((a, b) => a.nombre.localeCompare(b.nombre)), [secciones]);
+  const ordenadas = useMemo(() => [...secciones].sort((a, b) => {
+    const parse = (s: string) => {
+      const [grado, grupo] = s.split('-').map(Number);
+      return { grado: grado || 0, grupo: grupo || 0 };
+    };
+    const pa = parse(a.nombre);
+    const pb = parse(b.nombre);
+    if (pa.grado !== pb.grado) return pa.grado - pb.grado;
+    return pa.grupo - pb.grupo;
+  }), [secciones]);
 
   const handleAgregar = async () => {
     if (!nueva.trim()) return;
