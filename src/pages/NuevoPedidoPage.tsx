@@ -13,9 +13,11 @@ interface ProductoRow {
   id: string; nombre: string; precioUnitario: number; cantidad: number; subtotal: number;
 }
 
-export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
+export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSaveDraft, draft }: {
   onGoToProductos: () => void;
   onGoToSecciones: () => void;
+  onSaveDraft?: (draft: Record<string, any>) => void;
+  draft?: Record<string, any>;
 }) {
   const { crearPedido, error: pedidoError } = usePedidos();
   const { getProductosActivos, productos } = useProductos();
@@ -43,6 +45,16 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
   }, [productosActivos]);
 
   useEffect(() => {
+    if (draft && Object.keys(draft).length > 0) {
+      setNombreComprador(draft.nombreComprador || '');
+      setSeccion(draft.seccion || '');
+      setSeccionDestinatario(draft.seccionDestinatario || '');
+      setDestinatario(draft.destinatario || '');
+      setDescripcion(draft.descripcion || '');
+      setNotasInternas(draft.notasInternas || '');
+      setEstadoPedido(draft.estadoPedido || 'pagado');
+      return;
+    }
     const guardado = localStorage.getItem('nuevoPedidoDraft');
     if (guardado) {
       const d = JSON.parse(guardado);
@@ -56,6 +68,13 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones }: {
       localStorage.removeItem('nuevoPedidoDraft');
     }
   }, []);
+
+  useEffect(() => {
+    (window as any).__nuevoPedidoDraft = {
+      nombreComprador, seccion, seccionDestinatario,
+      destinatario, descripcion, notasInternas, estadoPedido
+    };
+  }, [nombreComprador, seccion, seccionDestinatario, destinatario, descripcion, notasInternas, estadoPedido]);
 
   const total = useMemo(() => rows.reduce((s, r) => s + r.subtotal, 0), [rows]);
 

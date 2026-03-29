@@ -187,8 +187,9 @@ export default function PedidosPage() {
                 <p style={{ color: '#AEABFA', fontSize: '13px', marginTop: '2px' }}>
                   Comprador: {p.seccion}
                   {p.seccionDestinatario && (
-                    <span style={{ color: '#22C55E', marginLeft: '8px' }}>
-                      → Entrega: {p.seccionDestinatario}
+                    <span style={{ marginLeft: '8px' }}>
+                      <span style={{ color: '#fff' }}>⮕</span>
+                      <span style={{ color: '#6A66DF' }}> Entrega: {p.seccionDestinatario}</span>
                     </span>
                   )}
                 </p>
@@ -224,7 +225,11 @@ export default function PedidosPage() {
                 <span style={{ color: '#9CA3AF', fontSize: '14px' }}>Total:</span>
                 <span style={{ color: '#AEABFA', fontSize: '18px', fontWeight: '700' }}>{fmt(p.total)}</span>
               </div>
-              <p style={{ color: '#6B7280', fontSize: '12px', marginTop: '8px' }}>{fmtFecha(p.creadoEn || p.fecha)}</p>
+              <p style={{ color: '#6B7280', fontSize: '12px', marginTop: '8px' }}>
+                {p.actualizadoEn && p.actualizadoEn !== p.creadoEn
+                  ? `Actualizado: ${fmtFecha(p.actualizadoEn)}`
+                  : fmtFecha(p.creadoEn || p.fecha)}
+              </p>
             </div>
 
             <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>

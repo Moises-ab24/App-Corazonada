@@ -19,6 +19,7 @@ function MainApp() {
   const { isConnected } = usePedidos();
   const [tab, setTab] = useState<Tab>('nuevo');
   const [subPage, setSubPage] = useState<SubPage>(null);
+  const [nuevoPedidoDraft, setNuevoPedidoDraft] = useState<Record<string, any>>({});
 
   if (isLoading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#000' }}>
@@ -40,7 +41,7 @@ function MainApp() {
     </div>
   );
 
- return (
+  return (
     <div style={{ height: '100dvh', background: '#000', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Top bar */}
       <div style={{
@@ -67,6 +68,8 @@ function MainApp() {
           <NuevoPedidoPage
             onGoToProductos={() => setSubPage('productos')}
             onGoToSecciones={() => setSubPage('secciones')}
+            onSaveDraft={(draft: Record<string, any>) => setNuevoPedidoDraft(draft)}
+            draft={nuevoPedidoDraft}
           />
         )}
         {tab === 'pedidos' && <PedidosPage />}
@@ -85,7 +88,13 @@ function MainApp() {
         ] as { id: Tab; icon: any; label: string }[]).map(t => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              if (t.id !== 'nuevo') {
+                const draft = (window as any).__nuevoPedidoDraft;
+                if (draft) setNuevoPedidoDraft(draft);
+              }
+              setTab(t.id);
+            }}
             style={{
               flex: 1, padding: '12px 0', display: 'flex', flexDirection: 'column',
               alignItems: 'center', gap: '4px', background: 'none', cursor: 'pointer',
