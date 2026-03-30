@@ -56,7 +56,12 @@ function MainApp() {
           {isConnected
             ? <Wifi size={18} color="#22C55E" />
             : <WifiOff size={18} color="#EF4444" />}
-          <button onClick={logout} style={{ background: 'none' }}>
+          <button onClick={() => {
+            localStorage.removeItem('nuevoPedidoDraft');
+            (window as any).__nuevoPedidoDraft = {};
+            setNuevoPedidoDraft({});
+            logout();
+          }} style={{ background: 'none' }}>
             <LogOut size={18} color="#EF4444" />
           </button>
         </div>

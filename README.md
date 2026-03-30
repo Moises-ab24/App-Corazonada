@@ -65,3 +65,29 @@ vercel --prod
 ```
 
 > Las variables de entorno se configuran desde el dashboard de Vercel, no se necesita el `.env` para desplegar.
+
+## 📄 Resumen general de todo el proyecto
+
+```text
+👤 Usuario abre la app
+   ↓
+🌐 Vercel sirve los archivos
+   ↓
+⚛️ React monta la app en el navegador
+   ↓
+🔐 AuthContext verifica la contraseña
+   ↓
+🗄️ PedidosContext conecta a SurrealDB
+   ↓
+⚡ Live query abre conexión en tiempo real
+   ↓
+📄 Las páginas muestran los datos
+   ↓
+✏️ Usuario crea/modifica pedidos
+   ↓
+🔄 Se actualiza la base de datos
+   ↓
+📡 Sincronización en todos los dispositivos
+   ↓
+✅ Cambios visibles al instante
+```
