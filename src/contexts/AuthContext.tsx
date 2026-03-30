@@ -12,7 +12,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 const PASSWORD = import.meta.env.VITE_APP_PASSWORD;
 const AUTH_KEY = 'corazonada_auth';
-const EXPIRY_KEY = 'corazonada_expiry';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,15 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const auth = localStorage.getItem(AUTH_KEY);
-    const expiry = localStorage.getItem(EXPIRY_KEY);
-    if (auth === 'true' && expiry) {
-      if (Date.now() < parseInt(expiry)) {
-        setIsAuthenticated(true);
-      } else {
-        localStorage.removeItem(AUTH_KEY);
-        localStorage.removeItem(EXPIRY_KEY);
-      }
+    const auth = sessionStorage.getItem(AUTH_KEY);
+    if (auth === 'true') {
+      setIsAuthenticated(true);
     }
     setIsLoading(false);
   }, []);
@@ -36,8 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback((password: string): boolean => {
     setError(null);
     if (password === PASSWORD) {
-      localStorage.setItem(AUTH_KEY, 'true');
-      localStorage.setItem(EXPIRY_KEY, (Date.now() + 24 * 60 * 60 * 1000).toString());
+      sessionStorage.setItem(AUTH_KEY, 'true');
       setIsAuthenticated(true);
       return true;
     }
@@ -46,8 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(AUTH_KEY);
-    localStorage.removeItem(EXPIRY_KEY);
+    sessionStorage.removeItem(AUTH_KEY);
     setIsAuthenticated(false);
   }, []);
 
