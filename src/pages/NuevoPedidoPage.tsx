@@ -91,8 +91,8 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
     if (!nombreComprador.trim() || nombreComprador.trim().length < 3)
       e.nombreComprador = 'El nombre debe tener al menos 3 caracteres';
     if (!seccion) e.seccion = 'Selecciona una sección';
-    if (!destinatario.trim() || destinatario.trim().length < 3)
-      e.destinatario = 'El destinatario debe tener al menos 3 caracteres';
+    if (destinatario.trim() && destinatario.trim().length < 3)
+      e.destinatario = 'El nombre debe tener al menos 3 caracteres';
     if (!rows.some(r => r.cantidad > 0)) e.productos = 'Selecciona al menos un producto';
     const invalidos = ['anonimo', 'anónimo', 'xxx', 'asd', 'test', 'prueba', 'xd'];
     if (invalidos.includes(nombreComprador.toLowerCase().trim())) e.nombreComprador = 'Ingresa un nombre válido';
@@ -107,7 +107,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
       nombreComprador: nombreComprador.trim(),
       seccion,
       seccionDestinatario: seccionDestinatario || undefined,
-      destinatario: destinatario.trim(),
+      destinatario: destinatario.trim() || nombreComprador.trim(),
       descripcion: descripcion.trim() || undefined,
       notasInternas: notasInternas.trim() || undefined,
       productos: rows.filter(r => r.cantidad > 0).map(r => ({
@@ -206,7 +206,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
 
         {/* Destinatario */}
         <div style={S.group}>
-          <label style={S.label}>Para quién es</label>
+          <label style={S.label}>Para quién es?</label>
           <input style={{ ...S.input, ...(errores.destinatario ? S.inputErr : {}) }}
             placeholder="Nombre del destinatario" value={destinatario}
             onChange={e => setDestinatario(e.target.value)} />

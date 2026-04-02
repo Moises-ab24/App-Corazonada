@@ -67,9 +67,9 @@ export default function EstadisticasPage() {
       </div>
 
       {/* Stat cards dinámicos */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '0 16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '0 16px', gridAutoRows: '1fr', width: '100%', boxSizing: 'border-box' }}>
         {/* Card fijo: Total Pedidos */}
-        <div style={{ background: '#111827', borderRadius: '16px', padding: '16px', textAlign: 'center' }}>
+        <div style={{ background: '#111827', borderRadius: '16px', padding: '16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{
             width: '44px', height: '44px', borderRadius: '12px',
             background: '#6B4EFF20', display: 'flex',
@@ -78,14 +78,14 @@ export default function EstadisticasPage() {
             <ShoppingBag size={24} color="#6B4EFF" />
           </div>
           <p style={{ color: '#fff', fontSize: '20px', fontWeight: '700' }}>{stats.totalPedidos}</p>
-          <p style={{ color: '#9CA3AF', fontSize: '12px', marginTop: '4px' }}>Total Pedidos</p>
+          <p style={{ color: '#9CA3AF', fontSize: '11px', marginTop: '4px', lineHeight: '1.3' }}>Total Pedidos</p>
         </div>
 
         {/* Cards dinámicos por producto real */}
         {stats.productosLista.map((prod, i) => {
           const color = CARD_COLORS[i % CARD_COLORS.length];
           return (
-            <div key={prod.nombre} style={{ background: '#111827', borderRadius: '16px', padding: '16px', textAlign: 'center' }}>
+            <div key={prod.nombre} style={{ background: '#111827', borderRadius: '16px', padding: '16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{
                 width: '44px', height: '44px', borderRadius: '12px',
                 background: color + '20', display: 'flex',
@@ -94,7 +94,7 @@ export default function EstadisticasPage() {
                 <Package size={24} color={color} />
               </div>
               <p style={{ color: '#fff', fontSize: '20px', fontWeight: '700' }}>{prod.cantidad}</p>
-              <p style={{ color: '#9CA3AF', fontSize: '12px', marginTop: '4px' }}>{prod.nombre}</p>
+              <p style={{ color: '#9CA3AF', fontSize: '11px', marginTop: '4px', lineHeight: '1.3' }}>{prod.nombre}</p>
             </div>
           );
         })}

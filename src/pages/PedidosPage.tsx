@@ -202,7 +202,7 @@ export default function PedidosPage() {
             </div>
 
             <div style={{ borderTop: '1px solid #1F2937', paddingTop: '12px' }}>
-              <p style={{ fontSize: '12px', color: '#9CA3AF' }}>Para:</p>
+              <p style={{ fontSize: '12px', color: '#9CA3AF' }}>Destinatario:</p>
               <p style={{ color: '#fff', fontSize: '15px', fontWeight: '500' }}>{p.destinatario}</p>
 
               {p.descripcion && <>

@@ -95,6 +95,10 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
   const crearPedido = useCallback(async (input: PedidoInput): Promise<boolean> => {
     try {
       setError(null);
+      if (!navigator.onLine) {
+        setError('Sin conexión a internet. Conectate y volvé a intentarlo.');
+        return false;
+      }
       const db = await getSurrealDB();
       const ahora = new Date().toISOString();
       const cinco = new Date(Date.now() - 5 * 60 * 1000).toISOString();
@@ -103,7 +107,7 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
         `SELECT * FROM pedidos WHERE string::lowercase(nombreComprador) = string::lowercase($n) AND string::lowercase(destinatario) = string::lowercase($d) AND seccion = $s AND creadoEn > $t`,
         { n: input.nombreComprador, d: input.destinatario, s: input.seccion, t: cinco }
       );
-      if (dup[0]?.length > 0) { setError('Pedido duplicado reciente.'); return false; }
+      if (dup[0]?.length > 0) { setError('Este pedido ya existe.'); return false; }
 
       const nuevo = { ...input, fecha: ahora, creadoEn: ahora, actualizadoEn: ahora }; await db.query(`CREATE pedidos CONTENT ${JSON.stringify(nuevo)}`);
       return true;

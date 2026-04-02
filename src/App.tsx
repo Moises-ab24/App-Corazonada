@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Heart, Plus, List, BarChart2, LogOut, Wifi, WifiOff } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProductosProvider } from './contexts/ProductosContext';
@@ -20,10 +20,48 @@ function MainApp() {
   const [tab, setTab] = useState<Tab>('nuevo');
   const [subPage, setSubPage] = useState<SubPage>(null);
   const [nuevoPedidoDraft, setNuevoPedidoDraft] = useState<Record<string, any>>({});
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Scroll positions por tab
+  const scrollPositions = useRef<Record<string, number>>({});
+  const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleTabChange = (newTab: Tab) => {
+    // Guardar scroll actual
+    if (scrollRefs.current[tab]) {
+      scrollPositions.current[tab] = scrollRefs.current[tab]!.scrollTop;
+    }
+    // Guardar draft si salimos de nuevo
+    if (tab !== 'nuevo') {
+      const draft = (window as any).__nuevoPedidoDraft;
+      if (draft) setNuevoPedidoDraft(draft);
+    }
+    setTab(newTab);
+  };
+
+  // Restaurar scroll al cambiar tab
+  useEffect(() => {
+    const ref = scrollRefs.current[tab];
+    if (ref && scrollPositions.current[tab] !== undefined) {
+      ref.scrollTop = scrollPositions.current[tab];
+    }
+  }, [tab]);
 
   if (isLoading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#000' }}>
-      <Heart size={48} color="#6B4EFF" fill="#6B4EFF" />
+      <img src="/image/icon.png" style={{ width: '280px', height: 'auto', objectFit: 'contain' }} />
     </div>
   );
 
@@ -53,15 +91,10 @@ function MainApp() {
           <span style={{ color: '#fff', fontWeight: '700', fontSize: '16px' }}>Corazonada</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {isConnected
+          {isOnline && isConnected
             ? <Wifi size={18} color="#22C55E" />
             : <WifiOff size={18} color="#EF4444" />}
-          <button onClick={() => {
-            localStorage.removeItem('nuevoPedidoDraft');
-            (window as any).__nuevoPedidoDraft = {};
-            setNuevoPedidoDraft({});
-            logout();
-          }} style={{ background: 'none' }}>
+          <button onClick={() => setConfirmLogout(true)} style={{ background: 'none', display: 'flex', alignItems: 'center', padding: 0 }}>
             <LogOut size={18} color="#EF4444" />
           </button>
         </div>
@@ -69,16 +102,29 @@ function MainApp() {
 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-        {tab === 'nuevo' && (
+        <div
+          ref={el => scrollRefs.current['nuevo'] = el}
+          style={{ height: '100%', overflowY: 'auto', display: tab === 'nuevo' ? 'block' : 'none' }}
+        >
           <NuevoPedidoPage
             onGoToProductos={() => setSubPage('productos')}
             onGoToSecciones={() => setSubPage('secciones')}
             onSaveDraft={(draft: Record<string, any>) => setNuevoPedidoDraft(draft)}
             draft={nuevoPedidoDraft}
           />
-        )}
-        {tab === 'pedidos' && <PedidosPage />}
-        {tab === 'estadisticas' && <EstadisticasPage />}
+        </div>
+        <div
+          ref={el => scrollRefs.current['pedidos'] = el}
+          style={{ height: '100%', display: tab === 'pedidos' ? 'flex' : 'none', flexDirection: 'column' }}
+        >
+          <PedidosPage />
+        </div>
+        <div
+          ref={el => scrollRefs.current['estadisticas'] = el}
+          style={{ height: '100%', overflowY: 'auto', display: tab === 'estadisticas' ? 'block' : 'none' }}
+        >
+          <EstadisticasPage />
+        </div>
       </div>
 
       {/* Bottom nav */}
@@ -93,13 +139,7 @@ function MainApp() {
         ] as { id: Tab; icon: any; label: string }[]).map(t => (
           <button
             key={t.id}
-            onClick={() => {
-              if (t.id !== 'nuevo') {
-                const draft = (window as any).__nuevoPedidoDraft;
-                if (draft) setNuevoPedidoDraft(draft);
-              }
-              setTab(t.id);
-            }}
+            onClick={() => handleTabChange(t.id)}
             style={{
               flex: 1, padding: '12px 0', display: 'flex', flexDirection: 'column',
               alignItems: 'center', gap: '4px', background: 'none', cursor: 'pointer',
@@ -112,6 +152,35 @@ function MainApp() {
           </button>
         ))}
       </div>
+
+      {/* Modal logout */}
+      {confirmLogout && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px' }}>
+          <div style={{ background: '#111827', borderRadius: '16px', padding: '24px', maxWidth: '360px', width: '100%', border: '1px solid #1F2937' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <LogOut size={22} color="#EF4444" />
+              <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600' }}>Cerrar Sesión</h3>
+            </div>
+            <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>¿Seguro que quieres cerrar sesión?</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmLogout(false)}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer' }}>
+                Cancelar
+              </button>
+              <button onClick={() => {
+                localStorage.removeItem('nuevoPedidoDraft');
+                (window as any).__nuevoPedidoDraft = {};
+                setNuevoPedidoDraft({});
+                setConfirmLogout(false);
+                logout();
+              }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#EF4444', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

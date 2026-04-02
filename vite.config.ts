@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'image/icon.png'],
+      includeAssets: ['image/icon.png'],
       manifest: {
         name: 'Corazonada Seniors 2026',
         short_name: 'Corazonada',
