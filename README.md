@@ -46,15 +46,6 @@ VITE_SURREALDB_PASSWORD=
 VITE_APP_PASSWORD=
 ```
 
-## 📦 Deploy en Vercel
-
-```bash
-npm i -g vercel
-vercel
-```
-
-O conectá el repositorio directamente desde [vercel.com](https://vercel.com) y configurá las variables de entorno en el dashboard.
-
 ## 🔄 Redesplegar desde cero
 
 Si clonás el proyecto en una máquina nueva:
@@ -64,9 +55,7 @@ vercel link
 vercel --prod
 ```
 
-> Las variables de entorno se configuran desde el dashboard de Vercel, no se necesita el `.env` para desplegar.
-
-## 📄 Resumen general de todo el proyecto
+## 📝 Resumen general de todo el proyecto
 
 ```text
 👤 Usuario abre la app
@@ -91,3 +80,7 @@ vercel --prod
    ↓
 ✅ Cambios visibles al instante
 ```
+
+## 📄 Licencia
+
+Todos los derechos reservados · Moisés Abarca · 2026
