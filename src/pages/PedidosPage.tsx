@@ -45,8 +45,9 @@ export default function PedidosPage() {
   );
 
   const filtrados = useMemo(() => pedidos.filter(p => {
-    const mb = !busqueda || p.nombreComprador.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.destinatario.toLowerCase().includes(busqueda.toLowerCase());
+    const normalizar = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const mb = !busqueda || normalizar(p.nombreComprador).includes(normalizar(busqueda)) ||
+      normalizar(p.destinatario).includes(normalizar(busqueda));
     const matchSeccion = !filtroSeccion || p.seccion === filtroSeccion;
     const matchSeccionDest = !filtroSeccionDest || p.seccionDestinatario === filtroSeccionDest;
     const matchEstado = filtrosEstado.size === 0 || filtrosEstado.has(p.estado);
@@ -187,15 +188,15 @@ export default function PedidosPage() {
                 <p style={{ color: '#AEABFA', fontSize: '13px', marginTop: '2px' }}>
                   Comprador: {p.seccion}
                   {p.seccionDestinatario && (
-                    <span style={{ marginLeft: '8px' }}>
+                    <span style={{ marginLeft: '4px' }}>
                       <span style={{ color: '#fff' }}>⮕</span>
                       <span style={{ color: '#6A66DF' }}> Entrega: {p.seccionDestinatario}</span>
                     </span>
                   )}
                 </p>
               </div>
-              <div style={{ background: STATUS_COLORS[p.estado] + '20', padding: '4px 10px', borderRadius: '12px' }}>
-                <span style={{ color: STATUS_COLORS[p.estado], fontSize: '12px', fontWeight: '600' }}>
+              <div style={{ background: STATUS_COLORS[p.estado] + '20', padding: '4px 8px', borderRadius: '12px', flexShrink: 0 }}>
+                <span style={{ color: STATUS_COLORS[p.estado], fontSize: '11px', fontWeight: '650' }}>
                   {p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}
                 </span>
               </div>
