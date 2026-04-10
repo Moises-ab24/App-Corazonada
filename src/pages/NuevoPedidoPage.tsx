@@ -306,9 +306,11 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
             <div key={r.id} style={S.productoRow}>
               <div style={{ flex: 1 }}>
                 <p style={{ color: '#fff', fontSize: '15px', fontWeight: '500' }}>{r.nombre}</p>
-                <p style={{ color: '#9CA3AF', fontSize: '13px' }}>{fmt(r.precioUnitario)}</p>
+                <p style={{ color: r.cantidad > 0 ? '#AEABFA' : '#9CA3AF', fontSize: '13px', fontWeight: r.cantidad > 0 ? '600' : '400' }}>
+                  {r.cantidad > 0 ? fmt(r.subtotal) : fmt(r.precioUnitario)}
+                </p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
                 <button style={S.countBtn} onClick={() => updateCantidad(r.id, -1)} disabled={r.cantidad === 0}>
                   <Minus size={16} color={r.cantidad > 0 ? '#fff' : '#4B5563'} />
                 </button>
@@ -319,11 +321,6 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
                   <Plus size={16} color="#fff" />
                 </button>
               </div>
-              {r.cantidad > 0 && (
-                <span style={{ color: '#AEABFA', fontSize: '14px', fontWeight: '600', marginLeft: '12px', minWidth: '70px', textAlign: 'right' }}>
-                  {fmt(r.subtotal)}
-                </span>
-              )}
             </div>
           ))}
         </div>
