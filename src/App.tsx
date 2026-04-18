@@ -21,6 +21,8 @@ function MainApp() {
   const [subPage, setSubPage] = useState<SubPage>(null);
   const [nuevoPedidoDraft, setNuevoPedidoDraft] = useState<Record<string, any>>({});
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const subPageRef = useRef<SubPage>(null);
+  const confirmLogoutRef = useRef(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   // Scroll positions por tab
@@ -38,12 +40,39 @@ function MainApp() {
     };
   }, []);
 
+  useEffect(() => {
+    subPageRef.current = subPage;
+    if (subPage) {
+      window.history.pushState(null, '', window.location.pathname);
+    }
+  }, [subPage]);
+
+  useEffect(() => {
+    confirmLogoutRef.current = confirmLogout;
+  }, [confirmLogout]);
+
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.pathname);
+
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.pathname);
+      if (subPageRef.current) {
+        setSubPage(null);
+      } else if (confirmLogoutRef.current) {
+        setConfirmLogout(false);
+      } else {
+        setConfirmLogout(true);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleTabChange = (newTab: Tab) => {
-    // Guardar scroll actual
     if (scrollRefs.current[tab]) {
       scrollPositions.current[tab] = scrollRefs.current[tab]!.scrollTop;
     }
-    // Guardar draft si salimos de nuevo
     if (tab !== 'nuevo') {
       const draft = (window as any).__nuevoPedidoDraft;
       if (draft) setNuevoPedidoDraft(draft);
@@ -51,7 +80,6 @@ function MainApp() {
     setTab(newTab);
   };
 
-  // Restaurar scroll al cambiar tab
   useEffect(() => {
     const ref = scrollRefs.current[tab];
     if (ref && scrollPositions.current[tab] !== undefined) {
@@ -69,13 +97,19 @@ function MainApp() {
 
   if (subPage === 'productos') return (
     <div style={{ height: '100vh', background: '#000', display: 'flex', flexDirection: 'column' }}>
-      <ProductosPage onBack={() => setSubPage(null)} />
+      <ProductosPage onBack={() => {
+        window.history.pushState(null, '', window.location.pathname);
+        setSubPage(null);
+      }} />
     </div>
   );
 
   if (subPage === 'secciones') return (
     <div style={{ height: '100vh', background: '#000', display: 'flex', flexDirection: 'column' }}>
-      <SeccionesPage onBack={() => setSubPage(null)} />
+      <SeccionesPage onBack={() => {
+        window.history.pushState(null, '', window.location.pathname);
+        setSubPage(null);
+      }} />
     </div>
   );
 
@@ -94,7 +128,7 @@ function MainApp() {
           {isOnline && isConnected
             ? <Wifi size={18} color="#22C55E" />
             : <WifiOff size={18} color="#EF4444" />}
-          <button onClick={() => setConfirmLogout(true)} style={{ background: 'none', display: 'flex', alignItems: 'center', padding: 0 }}>
+          <button type="button" onClick={() => setConfirmLogout(true)} style={{ background: 'none', display: 'flex', alignItems: 'center', padding: 0 }}>
             <LogOut size={18} color="#EF4444" />
           </button>
         </div>
@@ -107,8 +141,14 @@ function MainApp() {
           style={{ height: '100%', overflowY: 'auto', display: tab === 'nuevo' ? 'block' : 'none' }}
         >
           <NuevoPedidoPage
-            onGoToProductos={() => setSubPage('productos')}
-            onGoToSecciones={() => setSubPage('secciones')}
+            onGoToProductos={() => {
+              window.history.pushState(null, '', window.location.pathname);
+              setSubPage('productos');
+            }}
+            onGoToSecciones={() => {
+              window.history.pushState(null, '', window.location.pathname);
+              setSubPage('secciones');
+            }}
             onSaveDraft={(draft: Record<string, any>) => setNuevoPedidoDraft(draft)}
             draft={nuevoPedidoDraft}
           />
@@ -138,6 +178,7 @@ function MainApp() {
           { id: 'estadisticas', icon: BarChart2, label: 'Estadísticas' },
         ] as { id: Tab; icon: any; label: string }[]).map(t => (
           <button
+            type="button"
             key={t.id}
             onClick={() => handleTabChange(t.id)}
             style={{
@@ -163,17 +204,21 @@ function MainApp() {
             </div>
             <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>¿Seguro que quieres cerrar sesión?</p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setConfirmLogout(false)}
+              <button
+                type="button"
+                onClick={() => setConfirmLogout(false)}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer' }}>
                 Cancelar
               </button>
-              <button onClick={() => {
-                localStorage.removeItem('nuevoPedidoDraft');
-                (window as any).__nuevoPedidoDraft = {};
-                setNuevoPedidoDraft({});
-                setConfirmLogout(false);
-                logout();
-              }}
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('nuevoPedidoDraft');
+                  (window as any).__nuevoPedidoDraft = {};
+                  setNuevoPedidoDraft({});
+                  setConfirmLogout(false);
+                  logout();
+                }}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#EF4444', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>
                 Cerrar Sesión
               </button>

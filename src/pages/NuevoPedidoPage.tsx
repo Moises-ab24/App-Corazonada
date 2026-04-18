@@ -22,7 +22,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
   const { crearPedido, error: pedidoError } = usePedidos();
   const { getProductosActivos, productos } = useProductos();
   const { seccionesActivas } = useSecciones();
-  const [estadoPedido, setEstadoPedido] = useState<'pagado' | 'pendiente'>('pagado');
+  const [estadoPedido, setEstadoPedido] = useState<'pagado' | 'pendiente' | 'entregado'>('pagado');
   const [nombreComprador, setNombreComprador] = useState('');
   const [seccion, setSeccion] = useState('');
   const [seccionDestinatario, setSeccionDestinatario] = useState('');
@@ -269,21 +269,28 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
         {/* Estado del pedido */}
         <div style={S.group}>
           <label style={S.label}>Estado del pedido</label>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => setEstadoPedido('pagado')} style={{
-              flex: 1, padding: '12px', borderRadius: '12px', cursor: 'pointer',
+              flex: 1, padding: '10px 2px', borderRadius: '12px', cursor: 'pointer',
               background: estadoPedido === 'pagado' ? 'rgba(34,197,94,0.15)' : '#111827',
               border: estadoPedido === 'pagado' ? '1px solid #22C55E' : '1px solid #1F2937',
               color: estadoPedido === 'pagado' ? '#22C55E' : '#9CA3AF',
-              fontWeight: estadoPedido === 'pagado' ? '600' : '400', fontSize: '15px',
-            }}>✓ Pagado</button>
+              fontWeight: estadoPedido === 'pagado' ? '600' : '400', fontSize: '13px',
+            }}>💰 Pagado</button>
             <button onClick={() => setEstadoPedido('pendiente')} style={{
-              flex: 1, padding: '12px', borderRadius: '12px', cursor: 'pointer',
+              flex: 1, padding: '10px 4px', borderRadius: '12px', cursor: 'pointer',
               background: estadoPedido === 'pendiente' ? 'rgba(245,158,11,0.15)' : '#111827',
               border: estadoPedido === 'pendiente' ? '1px solid #F59E0B' : '1px solid #1F2937',
               color: estadoPedido === 'pendiente' ? '#F59E0B' : '#9CA3AF',
-              fontWeight: estadoPedido === 'pendiente' ? '600' : '400', fontSize: '15px',
+              fontWeight: estadoPedido === 'pendiente' ? '600' : '400', fontSize: '13px',
             }}>⏳ Pendiente</button>
+            <button onClick={() => setEstadoPedido('entregado')} style={{
+              flex: 1, padding: '10px 5px', borderRadius: '12px', cursor: 'pointer',
+              background: estadoPedido === 'entregado' ? 'rgba(107,78,255,0.15)' : '#111827',
+              border: estadoPedido === 'entregado' ? '1px solid #6B4EFF' : '1px solid #1F2937',
+              color: estadoPedido === 'entregado' ? '#6B4EFF' : '#9CA3AF',
+              fontWeight: estadoPedido === 'entregado' ? '600' : '400', fontSize: '13px',
+            }}>📦 Entregado</button>
           </div>
         </div>
 
