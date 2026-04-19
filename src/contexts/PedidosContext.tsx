@@ -89,7 +89,27 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
     };
 
     init();
-    return () => { mounted = false; unsubscribe?.(); };
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const db = await getSurrealDB();
+          const result = await db.query<Pedido[][]>('SELECT * FROM pedidos ORDER BY creadoEn DESC');
+          if (mounted && result[0]) {
+            setPedidos(result[0].map((p: any) => ({ ...p, id: parseId(p.id) })));
+          }
+        } catch (e) {
+          console.error('Error al recargar pedidos:', e);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      mounted = false;
+      unsubscribe?.();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const crearPedido = useCallback(async (input: PedidoInput): Promise<boolean> => {
