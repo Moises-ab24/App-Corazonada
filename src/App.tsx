@@ -21,22 +21,39 @@ function MainApp() {
   const [subPage, setSubPage] = useState<SubPage>(null);
   const [nuevoPedidoDraft, setNuevoPedidoDraft] = useState<Record<string, any>>({});
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showOfflineModal, setShowOfflineModal] = useState(false);
+  const [showOnlineBanner, setShowOnlineBanner] = useState(false);
   const subPageRef = useRef<SubPage>(null);
   const confirmLogoutRef = useRef(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const offlineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Scroll positions por tab
   const scrollPositions = useRef<Record<string, number>>({});
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+      setIsOnline(true);
+      if (offlineTimerRef.current) {
+        clearTimeout(offlineTimerRef.current);
+        offlineTimerRef.current = null;
+      }
+      setShowOfflineModal(false);
+      setShowOnlineBanner(true);
+      setTimeout(() => setShowOnlineBanner(false), 3000);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      offlineTimerRef.current = setTimeout(() => {
+        setShowOfflineModal(true);
+      }, 2000);
+    };
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      if (offlineTimerRef.current) clearTimeout(offlineTimerRef.current);
     };
   }, []);
 
@@ -53,7 +70,6 @@ function MainApp() {
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.pathname);
-
     const handlePopState = () => {
       window.history.pushState(null, '', window.location.pathname);
       if (subPageRef.current) {
@@ -64,7 +80,6 @@ function MainApp() {
         setConfirmLogout(true);
       }
     };
-
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -134,35 +149,42 @@ function MainApp() {
         </div>
       </div>
 
+      {/* Modal volvió internet */}
+      {showOnlineBanner && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px' }}>
+          <div style={{ background: '#111827', borderRadius: '16px', padding: '24px', maxWidth: '360px', width: '100%', border: '1px solid #1F2937', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Wifi size={32} color="#22C55E" />
+            </div>
+            <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Conexión restaurada</h3>
+            <p style={{ color: '#9CA3AF', fontSize: '14px', marginBottom: '24px' }}>
+              Ya podés crear y modificar pedidos con normalidad.
+            </p>
+            <button type="button" onClick={() => setShowOnlineBanner(false)}
+              style={{ width: '100%', padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#fff', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-        <div
-          ref={el => scrollRefs.current['nuevo'] = el}
-          style={{ height: '100%', overflowY: 'auto', display: tab === 'nuevo' ? 'block' : 'none' }}
-        >
+        <div ref={el => scrollRefs.current['nuevo'] = el}
+          style={{ height: '100%', overflowY: 'auto', display: tab === 'nuevo' ? 'block' : 'none' }}>
           <NuevoPedidoPage
-            onGoToProductos={() => {
-              window.history.pushState(null, '', window.location.pathname);
-              setSubPage('productos');
-            }}
-            onGoToSecciones={() => {
-              window.history.pushState(null, '', window.location.pathname);
-              setSubPage('secciones');
-            }}
+            onGoToProductos={() => { window.history.pushState(null, '', window.location.pathname); setSubPage('productos'); }}
+            onGoToSecciones={() => { window.history.pushState(null, '', window.location.pathname); setSubPage('secciones'); }}
             onSaveDraft={(draft: Record<string, any>) => setNuevoPedidoDraft(draft)}
             draft={nuevoPedidoDraft}
           />
         </div>
-        <div
-          ref={el => scrollRefs.current['pedidos'] = el}
-          style={{ height: '100%', display: tab === 'pedidos' ? 'flex' : 'none', flexDirection: 'column' }}
-        >
+        <div ref={el => scrollRefs.current['pedidos'] = el}
+          style={{ height: '100%', display: tab === 'pedidos' ? 'flex' : 'none', flexDirection: 'column' }}>
           <PedidosPage />
         </div>
-        <div
-          ref={el => scrollRefs.current['estadisticas'] = el}
-          style={{ height: '100%', overflowY: 'auto', display: tab === 'estadisticas' ? 'block' : 'none' }}
-        >
+        <div ref={el => scrollRefs.current['estadisticas'] = el}
+          style={{ height: '100%', overflowY: 'auto', display: tab === 'estadisticas' ? 'block' : 'none' }}>
           <EstadisticasPage />
         </div>
       </div>
@@ -177,15 +199,8 @@ function MainApp() {
           { id: 'pedidos', icon: List, label: 'Pedidos' },
           { id: 'estadisticas', icon: BarChart2, label: 'Estadísticas' },
         ] as { id: Tab; icon: any; label: string }[]).map(t => (
-          <button
-            type="button"
-            key={t.id}
-            onClick={() => handleTabChange(t.id)}
-            style={{
-              flex: 1, padding: '12px 0', display: 'flex', flexDirection: 'column',
-              alignItems: 'center', gap: '4px', background: 'none', cursor: 'pointer',
-            }}
-          >
+          <button type="button" key={t.id} onClick={() => handleTabChange(t.id)}
+            style={{ flex: 1, padding: '12px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'none', cursor: 'pointer' }}>
             <t.icon size={22} color={tab === t.id ? '#6B4EFF' : '#6B7280'} />
             <span style={{ fontSize: '11px', color: tab === t.id ? '#6B4EFF' : '#6B7280', fontWeight: tab === t.id ? '600' : '400' }}>
               {t.label}
@@ -193,6 +208,25 @@ function MainApp() {
           </button>
         ))}
       </div>
+
+      {/* Modal sin conexión */}
+      {showOfflineModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px' }}>
+          <div style={{ background: '#111827', borderRadius: '16px', padding: '24px', maxWidth: '360px', width: '100%', border: '1px solid #1F2937', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <WifiOff size={32} color="#EF4444" />
+            </div>
+            <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Sin conexión</h3>
+            <p style={{ color: '#9CA3AF', fontSize: '14px', marginBottom: '24px' }}>
+              No tenés internet. Conectate para poder crear o modificar pedidos.
+            </p>
+            <button type="button" onClick={() => setShowOfflineModal(false)}
+              style={{ width: '100%', padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal logout */}
       {confirmLogout && (
@@ -202,24 +236,19 @@ function MainApp() {
               <LogOut size={22} color="#EF4444" />
               <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600' }}>Cerrar Sesión</h3>
             </div>
-            <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>¿Seguro que quieres cerrar sesión?</p>
+            <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>¿Seguro que querés cerrar sesión?</p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={() => setConfirmLogout(false)}
+              <button type="button" onClick={() => setConfirmLogout(false)}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer' }}>
                 Cancelar
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  localStorage.removeItem('nuevoPedidoDraft');
-                  (window as any).__nuevoPedidoDraft = {};
-                  setNuevoPedidoDraft({});
-                  setConfirmLogout(false);
-                  logout();
-                }}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#EF4444', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>
+              <button type="button" onClick={() => {
+                localStorage.removeItem('nuevoPedidoDraft');
+                (window as any).__nuevoPedidoDraft = {};
+                setNuevoPedidoDraft({});
+                setConfirmLogout(false);
+                logout();
+              }} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#EF4444', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>
                 Cerrar Sesión
               </button>
             </div>
