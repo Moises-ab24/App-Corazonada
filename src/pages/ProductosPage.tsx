@@ -31,7 +31,7 @@ export default function ProductosPage({ onBack }: { onBack: () => void }) {
 
   const handleEditar = (p: Producto) => {
     setNombre(p.nombre); setPrecio(String(p.precio)); setDescripcion(p.descripcion || '');
-    setEditing(p.id); setShowForm(true);
+    setEditing(p.id); setShowForm(false);
   };
 
   return (
@@ -90,7 +90,34 @@ export default function ProductosPage({ onBack }: { onBack: () => void }) {
         {productos.length === 0 ? (
           <p style={{ color: '#6B7280', textAlign: 'center', paddingTop: '40px' }}>No hay productos</p>
         ) : productos.map(p => (
-          <div key={p.id} style={{
+          <div key={p.id}>
+          {editing === p.id && (
+            <div style={{ background: '#111827', borderRadius: '16px', padding: '16px', marginBottom: '10px' }}>
+              <p style={{ color: '#fff', fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Editar Producto</p>
+              {[
+                { label: 'Nombre', val: nombre, set: setNombre, placeholder: 'Nombre del producto' },
+                { label: 'Precio (₡)', val: precio, set: setPrecio, placeholder: '1500', type: 'number' },
+                { label: 'Descripción (opcional)', val: descripcion, set: setDescripcion, placeholder: 'Descripción...' },
+              ].map((f, i) => (
+                <div key={i} style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', color: '#9CA3AF', fontSize: '13px', marginBottom: '6px' }}>{f.label}</label>
+                  <input value={f.val} onChange={e => f.set(e.target.value)}
+                    placeholder={f.placeholder} type={f.type || 'text'}
+                    style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '12px 14px', color: '#fff', fontSize: '15px' }} />
+                </div>
+              ))}
+              {error && <p style={{ color: '#EF4444', fontSize: '13px', marginBottom: '8px' }}>{error}</p>}
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                <button onClick={reset} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#1F2937', color: '#9CA3AF', padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '15px' }}>
+                  <X size={18} /><span>Cancelar</span>
+                </button>
+                <button onClick={handleGuardar} style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#6B4EFF', color: '#fff', padding: '12px', borderRadius: '10px', cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>
+                  <Check size={18} /><span>Actualizar</span>
+                </button>
+              </div>
+            </div>
+          )}
+          <div style={{
             display: 'flex', alignItems: 'center', background: '#111827',
             borderRadius: '12px', padding: '14px', marginBottom: '10px',
             opacity: p.activo ? 1 : 0.6,
@@ -115,6 +142,7 @@ export default function ProductosPage({ onBack }: { onBack: () => void }) {
               ))}
             </div>
           </div>
+        </div>
         ))}
       </div>
 
