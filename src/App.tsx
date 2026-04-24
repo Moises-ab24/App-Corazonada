@@ -236,7 +236,7 @@ function MainApp() {
               <LogOut size={22} color="#EF4444" />
               <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600' }}>Cerrar Sesión</h3>
             </div>
-            <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>¿Seguro que querés cerrar sesión?</p>
+            <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>¿Seguro que quieres cerrar sesión?</p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button type="button" onClick={() => setConfirmLogout(false)}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer' }}>

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, Trash2 } from 'lucide-react';
+import { Search, Filter, Trash2, Pencil, ChevronDown } from 'lucide-react';
 import { usePedidos } from '../contexts/PedidosContext';
 import { useSecciones } from '../contexts/SeccionesContext';
 import { useProductos } from '../contexts/ProductosContext';
@@ -27,7 +27,7 @@ function sortSecciones(a: string, b: string): number {
 }
 
 export default function PedidosPage() {
-  const { pedidos, isLoading, cambiarEstado, eliminarPedido } = usePedidos();
+  const { pedidos, isLoading, cambiarEstado, eliminarPedido, actualizarPedido } = usePedidos();
   const { secciones } = useSecciones();
   const { productos } = useProductos();
   const [confirmEstado, setConfirmEstado] = useState<{ pedido: Pedido; estado: typeof ESTADOS_PEDIDO[0] } | null>(null);
@@ -38,6 +38,16 @@ export default function PedidosPage() {
   const [busqueda, setBusqueda] = useState('');
   const [showFiltros, setShowFiltros] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Pedido | null>(null);
+  const [confirmEdit, setConfirmEdit] = useState<Pedido | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editNombre, setEditNombre] = useState('');
+  const [editDestinatario, setEditDestinatario] = useState('');
+  const [editSeccion, setEditSeccion] = useState('');
+  const [editSeccionDest, setEditSeccionDest] = useState('');
+  const [editDescripcion, setEditDescripcion] = useState('');
+  const [editNotas, setEditNotas] = useState('');
+  const [mostrarSeccionesEdit, setMostrarSeccionesEdit] = useState(false);
+  const [mostrarSeccionesDestEdit, setMostrarSeccionesDestEdit] = useState(false);
 
   const seccionesOrdenadas = useMemo(() =>
     [...secciones].sort((a, b) => sortSecciones(a.nombre, b.nombre)),
@@ -86,6 +96,30 @@ export default function PedidosPage() {
     (filtroSeccionDest ? 1 : 0) +
     filtrosEstado.size +
     filtrosProducto.size;
+
+  const handleEditar = (p: Pedido) => {
+    if (editingId === p.id) { setEditingId(null); return; }
+    setEditingId(p.id);
+    setEditNombre(p.nombreComprador);
+    setEditDestinatario(p.destinatario);
+    setEditSeccion(p.seccion);
+    setEditSeccionDest(p.seccionDestinatario || '');
+    setEditDescripcion(p.descripcion || '');
+    setEditNotas(p.notasInternas || '');
+  };
+
+  const handleGuardarEdicion = async (id: string) => {
+    if (!editNombre.trim() || !editSeccion) return;
+    await actualizarPedido(id, {
+      nombreComprador: editNombre.trim(),
+      destinatario: editDestinatario.trim() || editNombre.trim(),
+      seccion: editSeccion,
+      seccionDestinatario: editSeccionDest || undefined,
+      descripcion: editDescripcion.trim() || undefined,
+      notasInternas: editNotas.trim() || undefined,
+    });
+    setEditingId(null);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -195,12 +229,87 @@ export default function PedidosPage() {
                   )}
                 </p>
               </div>
-              <div style={{ background: STATUS_COLORS[p.estado] + '20', padding: '4px 8px', borderRadius: '12px', flexShrink: 0 }}>
+              <div style={{ background: STATUS_COLORS[p.estado] + '20', padding: '3px 8px', borderRadius: '12px', flexShrink: 0 }}>
                 <span style={{ color: STATUS_COLORS[p.estado], fontSize: '11px', fontWeight: '650' }}>
                   {p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}
                 </span>
               </div>
             </div>
+
+            {editingId === p.id && (
+              <div style={{ borderTop: '1px solid #1F2937', paddingTop: '12px', marginBottom: '12px' }}>
+                <p style={{ color: '#AEABFA', fontSize: '13px', fontWeight: '600', marginBottom: '12px' }}>Editor de pedidos ✏️</p>
+
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>Nombre del comprador</p>
+                <input value={editNombre} onChange={e => setEditNombre(e.target.value)}
+                  style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '15px', marginBottom: '10px' }} />
+
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>Destinatario</p>
+                <input value={editDestinatario} onChange={e => setEditDestinatario(e.target.value)}
+                  style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '15px', marginBottom: '10px' }} />
+
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>Sección del comprador</p>
+                <div style={{ position: 'relative', marginBottom: '10px' }}>
+                  <button onClick={() => { setMostrarSeccionesEdit(!mostrarSeccionesEdit); setMostrarSeccionesDestEdit(false); }}
+                    style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '10px 14px', color: editSeccion ? '#fff' : '#6B7280', fontSize: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                    <span>{editSeccion || 'Seleccioná la sección'}</span>
+                    <ChevronDown size={18} color="#9CA3AF" />
+                  </button>
+                  {mostrarSeccionesEdit && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100, background: '#111827', border: '1px solid #1F2937', borderRadius: '10px', maxHeight: '160px', overflowY: 'auto', marginTop: '4px' }}>
+                      {seccionesOrdenadas.map(s => (
+                        <button key={s.id} onClick={() => { setEditSeccion(s.nombre); setMostrarSeccionesEdit(false); }}
+                          style={{ display: 'block', width: '100%', background: 'none', padding: '10px 14px', color: editSeccion === s.nombre ? '#AEABFA' : '#D1D5DB', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #1F2937' }}>
+                          {s.nombre}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>Sección del destinatario <span style={{ color: '#6B7280' }}>(opcional)</span></p>
+                <div style={{ position: 'relative', marginBottom: '10px' }}>
+                  <button onClick={() => { setMostrarSeccionesDestEdit(!mostrarSeccionesDestEdit); setMostrarSeccionesEdit(false); }}
+                    style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '10px 14px', color: editSeccionDest ? '#fff' : '#6B7280', fontSize: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                    <span>{editSeccionDest || 'Si se sabe, seleccioná la sección'}</span>
+                    <ChevronDown size={18} color="#9CA3AF" />
+                  </button>
+                  {mostrarSeccionesDestEdit && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100, background: '#111827', border: '1px solid #1F2937', borderRadius: '10px', maxHeight: '160px', overflowY: 'auto', marginTop: '4px' }}>
+                      <button onClick={() => { setEditSeccionDest(''); setMostrarSeccionesDestEdit(false); }}
+                        style={{ display: 'block', width: '100%', background: 'none', padding: '10px 14px', color: '#9CA3AF', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #1F2937' }}>
+                        Sin sección
+                      </button>
+                      {seccionesOrdenadas.map(s => (
+                        <button key={s.id} onClick={() => { setEditSeccionDest(s.nombre); setMostrarSeccionesDestEdit(false); }}
+                          style={{ display: 'block', width: '100%', background: 'none', padding: '10px 14px', color: editSeccionDest === s.nombre ? '#AEABFA' : '#D1D5DB', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #1F2937' }}>
+                          {s.nombre}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>Mensaje <span style={{ color: '#6B7280' }}>(opcional)</span></p>
+                <textarea value={editDescripcion} onChange={e => setEditDescripcion(e.target.value)}
+                  style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '15px', height: '70px', resize: 'none', marginBottom: '10px' }} />
+
+                <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '4px' }}>Notas del pedido <span style={{ color: '#6B7280' }}>(opcional)</span></p>
+                <textarea value={editNotas} onChange={e => setEditNotas(e.target.value)}
+                  style={{ width: '100%', background: '#1F2937', border: 'none', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '15px', height: '70px', resize: 'none', marginBottom: '12px' }} />
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => setEditingId(null)}
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer', fontSize: '14px' }}>
+                    Cancelar
+                  </button>
+                  <button onClick={() => handleGuardarEdicion(p.id)}
+                    style={{ flex: 2, padding: '10px', borderRadius: '10px', background: '#6B4EFF', color: '#fff', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>
+                    Guardar cambios
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div style={{ borderTop: '1px solid #1F2937', paddingTop: '12px' }}>
               <p style={{ fontSize: '12px', color: '#9CA3AF' }}>Destinatario:</p>
@@ -237,19 +346,23 @@ export default function PedidosPage() {
               {ESTADOS_PEDIDO.map(e => (
                 <button key={e.id} onClick={() => p.estado !== e.id && setConfirmEstado({ pedido: p, estado: e })}
                   style={{
-                    flex: 1, padding: '8px 0', borderRadius: '8px',
+                    flex: 1, padding: '7px 0', borderRadius: '8px',
                     background: p.estado === e.id ? e.color + '40' : e.color + '15',
                     color: p.estado === e.id ? '#fff' : '#D1D5DB',
-                    fontSize: '12px', fontWeight: p.estado === e.id ? '700' : '500',
+                    fontSize: '11px', fontWeight: p.estado === e.id ? '800' : '600',
                     cursor: 'pointer',
                     border: p.estado === e.id ? `1px solid ${e.color}` : '1px solid transparent',
                   }}>
                   {e.nombre}
                 </button>
               ))}
+              <button onClick={() => editingId === p.id ? setEditingId(null) : setConfirmEdit(p)}
+                style={{ padding: '7px 9px', borderRadius: '8px', background: 'rgba(174,171,250,0.15)', cursor: 'pointer' }}>
+                <Pencil size={15} color="#AEABFA" />
+              </button>
               <button onClick={() => setConfirmDelete(p)}
-                style={{ padding: '8px 12px', borderRadius: '8px', background: 'rgba(239,68,68,0.15)', cursor: 'pointer' }}>
-                <Trash2 size={18} color="#EF4444" />
+                style={{ padding: '7px 9px', borderRadius: '8px', background: 'rgba(239,68,68,0.15)', cursor: 'pointer' }}>
+                <Trash2 size={15} color="#EF4444" />
               </button>
             </div>
           </div>
@@ -261,7 +374,7 @@ export default function PedidosPage() {
           <div style={{ background: '#111827', borderRadius: '16px', padding: '24px', maxWidth: '360px', width: '100%', border: '1px solid #1F2937' }}>
             <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600', marginBottom: '12px' }}>Eliminar Pedido</h3>
             <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>
-              ¿Eliminar el pedido de <strong style={{ color: '#fff' }}>{confirmDelete.nombreComprador}</strong>?
+              ¿Quieres eliminar el pedido de <strong style={{ color: '#fff' }}>{confirmDelete.nombreComprador}</strong>?
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={() => setConfirmDelete(null)}
@@ -277,12 +390,33 @@ export default function PedidosPage() {
         </div>
       )}
 
+      {confirmEdit && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px' }}>
+          <div style={{ background: '#111827', borderRadius: '16px', padding: '24px', maxWidth: '360px', width: '100%', border: '1px solid #1F2937' }}>
+            <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600', marginBottom: '12px' }}>Editar Pedido</h3>
+            <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>
+              ¿Quieres editar el pedido de <strong style={{ color: '#fff' }}>{confirmEdit.nombreComprador}</strong>?
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmEdit(null)}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer' }}>
+                Cancelar
+              </button>
+              <button onClick={() => { handleEditar(confirmEdit); setConfirmEdit(null); }}
+                style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#7E7BCF', color: '#fff', fontWeight: '600', cursor: 'pointer' }}>
+                Editar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {confirmEstado && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px' }}>
           <div style={{ background: '#111827', borderRadius: '16px', padding: '24px', maxWidth: '360px', width: '100%', border: '1px solid #1F2937' }}>
             <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '600', marginBottom: '12px' }}>Cambiar Estado</h3>
             <p style={{ color: '#9CA3AF', marginBottom: '24px' }}>
-              ¿Cambiar el pedido de <strong style={{ color: '#fff' }}>{confirmEstado.pedido.nombreComprador}</strong> a{' '}
+              ¿Quieres cambiar el pedido de <strong style={{ color: '#fff' }}>{confirmEstado.pedido.nombreComprador}</strong> a{' '}
               <strong style={{ color: confirmEstado.estado.color }}>{confirmEstado.estado.nombre}</strong>?
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
