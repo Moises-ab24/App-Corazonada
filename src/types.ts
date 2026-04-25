@@ -22,6 +22,8 @@ export interface Pedido {
   fecha: string;
   creadoEn?: string;
   actualizadoEn?: string;
+  creadoPor?: string;
+  modificadoPor?: string;
 }
 
 export interface PedidoInput {
@@ -34,6 +36,8 @@ export interface PedidoInput {
   productos: ProductoPedido[];
   total: number;
   estado: EstadoPedido;
+  creadoPor?: string;
+  modificadoPor?: string;
 }
 
 export interface Estadisticas {

@@ -3,6 +3,7 @@ import { Search, Filter, Trash2, Pencil, ChevronDown } from 'lucide-react';
 import { usePedidos } from '../contexts/PedidosContext';
 import { useSecciones } from '../contexts/SeccionesContext';
 import { useProductos } from '../contexts/ProductosContext';
+import { useAuth } from '../contexts/AuthContext';
 import { ESTADOS_PEDIDO } from '../types';
 import type { Pedido, EstadoPedido } from '../types';
 
@@ -28,6 +29,7 @@ function sortSecciones(a: string, b: string): number {
 
 export default function PedidosPage() {
   const { pedidos, isLoading, cambiarEstado, eliminarPedido, actualizarPedido } = usePedidos();
+  const { nombre: nombreRegistrador } = useAuth();
   const { secciones } = useSecciones();
   const { productos } = useProductos();
   const [confirmEstado, setConfirmEstado] = useState<{ pedido: Pedido; estado: typeof ESTADOS_PEDIDO[0] } | null>(null);
@@ -117,6 +119,7 @@ export default function PedidosPage() {
       seccionDestinatario: editSeccionDest || undefined,
       descripcion: editDescripcion.trim() || undefined,
       notasInternas: editNotas.trim() || undefined,
+      modificadoPor: nombreRegistrador || undefined,
     });
     setEditingId(null);
   };
@@ -340,6 +343,13 @@ export default function PedidosPage() {
                   ? `Actualizado: ${fmtFecha(p.actualizadoEn)}`
                   : fmtFecha(p.creadoEn || p.fecha)}
               </p>
+              <p style={{ color: '#6B7280', fontSize: '12px', marginTop: '2px' }}>
+                {p.modificadoPor
+                  ? `Modificado por: ${p.modificadoPor}`
+                  : p.creadoPor
+                    ? `Registrado por: ${p.creadoPor}`
+                    : null}
+              </p>
             </div>
 
             <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
@@ -424,7 +434,7 @@ export default function PedidosPage() {
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#1F2937', color: '#D1D5DB', cursor: 'pointer' }}>
                 Cancelar
               </button>
-              <button onClick={async () => { await cambiarEstado(confirmEstado.pedido.id, confirmEstado.estado.id); setConfirmEstado(null); }}
+              <button onClick={async () => { await actualizarPedido(confirmEstado.pedido.id, { estado: confirmEstado.estado.id, modificadoPor: nombreRegistrador || undefined }); setConfirmEstado(null); }}
                 style={{ flex: 1, padding: '12px', borderRadius: '10px', background: confirmEstado.estado.color, color: '#fff', fontWeight: '600', cursor: 'pointer' }}>
                 Confirmar
               </button>

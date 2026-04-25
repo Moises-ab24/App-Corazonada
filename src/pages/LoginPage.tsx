@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Heart, Lock, Eye, EyeOff, Shield, XCircle } from 'lucide-react';
+import { Heart, Lock, Eye, EyeOff, Shield, XCircle, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
+  const [nombre, setNombre] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, error } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.trim()) login(password);
+    if (password.trim()) login(password, nombre);
   };
 
   return (
@@ -47,6 +48,31 @@ export default function LoginPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <User size={16} color="#AEABFA" />
+              <span style={{ fontSize: '14px', color: '#D1D5DB', fontWeight: '500' }}>Nombre</span>
+            </div>
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            background: '#111827', borderRadius: '12px',
+            border: '1px solid #1F2937', height: '52px',
+            marginBottom: '16px',
+          }}>
+            <input
+              type="text"
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              placeholder="Ingresa tu nombre"
+              style={{
+                flex: 1, background: 'transparent', border: 'none',
+                color: '#fff', fontSize: '16px', padding: '0 16px',
+                height: '100%',
+              }}
+            />
+          </div>
+
           <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Shield size={16} color="#AEABFA" />
             <span style={{ fontSize: '14px', color: '#D1D5DB', fontWeight: '500' }}>
@@ -94,10 +120,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={!password.trim()}
+            disabled={!password.trim() || !nombre.trim()}
             style={{
               width: '100%', height: '52px', borderRadius: '12px',
-              background: password.trim() ? '#6B4EFF' : '#374151',
+              background: password.trim() && nombre.trim() ? '#6B4EFF' : '#374151',
               color: '#fff', fontSize: '16px', fontWeight: '600',
               cursor: password.trim() ? 'pointer' : 'not-allowed',
               transition: 'background 0.2s',

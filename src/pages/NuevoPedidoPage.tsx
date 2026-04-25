@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChevronDown, Plus, Minus, Check, X, Settings } from 'lucide-react';
 import { usePedidos } from '../contexts/PedidosContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useProductos } from '../contexts/ProductosContext';
 import { useSecciones } from '../contexts/SeccionesContext';
 import type { PedidoInput } from '../types';
@@ -20,6 +21,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
   draft?: Record<string, any>;
 }) {
   const { crearPedido, error: pedidoError } = usePedidos();
+  const { nombre: nombreRegistrador } = useAuth();
   const { getProductosActivos, productos } = useProductos();
   const { seccionesActivas } = useSecciones();
   const [estadoPedido, setEstadoPedido] = useState<'pagado' | 'pendiente' | 'entregado'>('pagado');
@@ -115,6 +117,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
         precioUnitario: r.precioUnitario, subtotal: r.subtotal,
       })),
       total, estado: estadoPedido,
+      creadoPor: nombreRegistrador || undefined,
     };
     const ok = await crearPedido(input);
     if (ok) {
@@ -153,7 +156,7 @@ export default function NuevoPedidoPage({ onGoToProductos, onGoToSecciones, onSa
     <div style={{ overflowY: 'auto', height: '100%', paddingBottom: '32px' }}>
       <div style={{ padding: '10px 16px 8px' }}>
         <h1 style={S.title}>Nuevo Pedido</h1>
-        <p style={S.subtitle}>Registra un pedido de Corazonada</p>
+        <p style={S.subtitle}>Registra un pedido de la Corazonada</p>
       </div>
 
       <div style={{ padding: '0 16px' }}>
