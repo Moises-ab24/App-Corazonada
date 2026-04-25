@@ -7,10 +7,10 @@ Ya disponible en (https://corazonadaseniors.vercel.app)
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/8d57be24-d5c5-425e-89c3-8cb90c5404de" width="165" height="350"/>
+  <img src="https://github.com/user-attachments/assets/94f4e75e-8877-4f5b-ae19-9425f7a9a6e5" width="165" height="350"/>
   <img src="https://github.com/user-attachments/assets/44fd354e-1de1-4eda-a7c6-50e6c17109b2" width="165" height="350"/>
   <img src="https://github.com/user-attachments/assets/152ff013-af30-49c4-bcc4-cb17ae4f05b1" width="165" height="350"/>
-  <img src="https://github.com/user-attachments/assets/895f8dff-760b-4305-ba1f-48ada67fd242" width="165" height="350"/>
+  <img src="https://github.com/user-attachments/assets/f86007a5-a6b8-417d-ac3f-4e547fef9f1f" width="165" height="350"/>
   <img src="https://github.com/user-attachments/assets/bee59f6d-d6ba-48b9-baa0-f8775fb72d38" width="165" height="350"/>
   <img src="https://github.com/user-attachments/assets/a435f246-5b79-4f0b-8a93-f62bac431ec5" width="165" height="350"/>
   <img src="https://github.com/user-attachments/assets/9b6dbc19-0564-461e-95bb-0c0b2d830d56" width="165" height="350"/>
