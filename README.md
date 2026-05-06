@@ -31,42 +31,6 @@ Ya disponible en (https://corazonadaseniors.vercel.app)
 - [SurrealDB](https://surrealdb.com/) — base de datos con sincronización en tiempo real
 - [Lucide React](https://lucide.dev/) — íconos
 
-## 🚀 Correr localmente
-
-```bash
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-cp .env.example .env
-# Editá el .env con tus credenciales de SurrealDB
-
-# Correr en desarrollo
-npm run dev
-```
-
-## ⚙️ Variables de entorno
-
-Creá un archivo `.env` en la raíz con:
-
-```
-VITE_SURREALDB_ENDPOINT=
-VITE_SURREALDB_NAMESPACE=
-VITE_SURREALDB_DATABASE=
-VITE_SURREALDB_USERNAME=
-VITE_SURREALDB_PASSWORD=
-VITE_APP_PASSWORD=
-```
-
-## 🔄 Redesplegar desde cero
-
-Si clonás el proyecto en una máquina nueva:
-```bash
-npm install
-vercel link
-vercel --prod
-```
-
 ## 📝 Resumen general de todo el proyecto
 
 ```text
