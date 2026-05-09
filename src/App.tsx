@@ -129,7 +129,7 @@ function MainApp() {
   );
 
   return (
-    <div style={{ height: '100dvh', background: '#000', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ height: '100dvh', background: '#000', display: 'flex', flexDirection: 'column', width: '100%' }}>
       {/* Top bar */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
